@@ -6,7 +6,7 @@
 
 
 int main(int, char**) {
-    std::cout << "A Fucking Calibration Code"<<std::endl;
+    std::cout <<"Calibration Code"<<std::endl;
 
     int img_num = 31;
 
@@ -24,7 +24,7 @@ int main(int, char**) {
         cv::Mat image_gray;
         cv::cvtColor(image, image_gray, cv::COLOR_RGB2GRAY);
 
-        cv::imshow("FUCKKKKKKKKKKKKKKKKKKKKKKKKKK", image);
+        cv::imshow("Image", image_gray);
         cv::waitKey(1);
     }
 
