@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/dongha/dev/bundle_adjustment_test/calibration/build",
+  "command": "/bin/x86_64-linux-gnu-g++-9  -isystem /usr/local/include/opencv4 -g -o CMakeFiles/calibration.dir/main.cpp.o -c /home/dongha/dev/bundle_adjustment_test/calibration/main.cpp",
+  "file": "/home/dongha/dev/bundle_adjustment_test/calibration/main.cpp"
+}
+]
