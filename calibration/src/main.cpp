@@ -39,7 +39,7 @@ double computeReprojectionErrors(const std::vector<std::vector<cv::Point3f>> &ob
 int main(int, char **)
 {
     std::cout << "Calibration Code" << std::endl;
-    std::string data_dir = "calib_dataset";
+    std::string data_dir = "../calib_dataset";
     int img_num = 50;
 
     std::vector<std::vector<cv::Point3f>> board3DPs;
@@ -128,9 +128,10 @@ int main(int, char **)
     std::cout<<cameraMatrix<<std::endl;
 
     Json::Value root;
+    Json::Value ImageSize;
     Json::Value CameraMatrix;
     Json::Value DistortionCoeff;
-
+    
     for(int i=0; i<3; ++i) {
         for(int j=0; j<3; ++j) {
             std::string value_num = "c"+std::to_string(i)+std::to_string(j);
@@ -143,6 +144,10 @@ int main(int, char **)
         DistortionCoeff[value_num] = std::to_string(distCoeffs.at<double>(i,0));
     }
 
+    ImageSize["width"] = std::to_string(img_width);
+    ImageSize["height"] = std::to_string(img_height);
+
+    root["ImageSize"] = ImageSize;
     root["CameraMatrix"] = CameraMatrix;
     root["DistortionCoeff"] = DistortionCoeff;
 
@@ -151,7 +156,7 @@ int main(int, char **)
     
     std::cout<<outputConfig<<std::endl;
 
-    std::string calib_result_path = "camera_calibration_result.json";
+    std::string calib_result_path = "../camera_calibration_result.json";
     std::ofstream writeFile(calib_result_path.data());
     if(writeFile.is_open()) {
         writeFile << outputConfig;
