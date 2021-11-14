@@ -3,6 +3,9 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/core.hpp>
 #include <string>
+#include <jsoncpp/json/json.h>
+#include <fstream>
+
 
 int CHECKERBOARD[2]{8, 8};
 
@@ -119,9 +122,40 @@ int main(int, char **)
 
     std::vector<float> perViewErrors;
 
-    double reprojection_err = computeReprojectionErrors(board3DPs, corner_pts_container, rvecs, tvecs, cameraMatrix, distCoeffs, perViewErrors);
-    std::cout<<reprojection_err<<std::endl;
+    std::cout<<"Image Size: "<<std::endl;
     std::cout<<img_size<<std::endl;
+    std::cout<<"Camera Matrix: "<<std::endl;
     std::cout<<cameraMatrix<<std::endl;
+
+    Json::Value root;
+    Json::Value CameraMatrix;
+    Json::Value DistortionCoeff;
+
+    for(int i=0; i<3; ++i) {
+        for(int j=0; j<3; ++j) {
+            std::string value_num = "c"+std::to_string(i)+std::to_string(j);
+            CameraMatrix[value_num] = std::to_string(cameraMatrix.at<double>(i,j));
+        }
+    }
+
+    for(int i=0; i<8; ++i) {
+        std::string value_num = "d"+std::to_string(i);
+        DistortionCoeff[value_num] = std::to_string(distCoeffs.at<double>(i,0));
+    }
+
+    root["CameraMatrix"] = CameraMatrix;
+    root["DistortionCoeff"] = DistortionCoeff;
+
+    Json::StyledWriter writer;
+    std::string outputConfig = writer.write(root);
+    
+    std::cout<<outputConfig<<std::endl;
+
+    std::string calib_result_path = "camera_calibration_result.json";
+    std::ofstream writeFile(calib_result_path.data());
+    if(writeFile.is_open()) {
+        writeFile << outputConfig;
+        writeFile.close();
+    }
 }
 
