@@ -28,7 +28,7 @@ int main(int argc, char**argv) {
         }
 
 
-        
+
         cv::imshow("Fucking", frame);
         cv::waitKey(1);
     }
