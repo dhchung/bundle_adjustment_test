@@ -40,7 +40,7 @@ int main(int, char **)
 {
     std::cout << "Calibration Code" << std::endl;
     std::string data_dir = "../calib_dataset";
-    int img_num = 50;
+    int img_num = 90;
 
     std::vector<std::vector<cv::Point3f>> board3DPs;
     std::vector<cv::Point3f> board3DP(CHECKERBOARD[0] * CHECKERBOARD[1]);
