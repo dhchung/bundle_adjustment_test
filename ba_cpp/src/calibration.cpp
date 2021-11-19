@@ -51,7 +51,7 @@ int main(int, char **)
     int checker_board_y = 10;
 
     std::cout << "Calibration Code" << std::endl;
-    std::string data_dir = "../calib_dataset/new";
+    std::string data_dir = "../calib_dataset";
     int img_num = 54;
 
     std::vector<std::vector<cv::Point3f>> board3DPs;

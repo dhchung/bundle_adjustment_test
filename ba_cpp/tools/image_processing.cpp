@@ -30,3 +30,29 @@ cv::Mat ImageProcessing::UndistortImage(cv::Mat & img) {
     cv::undistort(img, undistorted_img, cameraMatrix, distCoeffs);
     return undistorted_img;
 }
+
+void ImageProcessing::setupORB(int MatchingMethod){
+    feature = cv::ORB::create();
+    matcher = cv::BFMatcher::create(MatchingMethod);
+}
+
+
+std::pair<std::vector<cv::KeyPoint>, cv::Mat> ImageProcessing::extractFeaturesAndDescriptors(cv::Mat & img) {
+
+    std::vector<cv::KeyPoint> KeyPoints;
+    cv::Mat Descriptors;
+
+    if(img.channels()>1) {\
+
+        cv::Mat img_gray;
+        cv::cvtColor(img, img_gray, cv::COLOR_RGB2GRAY);
+        feature->detectAndCompute(img_gray, cv::Mat(), KeyPoints, Descriptors);
+
+    } else if(img.channels() == 1) {
+
+        feature->detectAndCompute(img, cv::Mat(), KeyPoints, Descriptors);
+    }
+
+    return std::pair<std::vector<cv::KeyPoint>, cv::Mat>(KeyPoints, Descriptors);
+
+}

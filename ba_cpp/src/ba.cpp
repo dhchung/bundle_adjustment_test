@@ -10,8 +10,10 @@ int main(int argc, char**argv) {
     Params params;
     params.read_data(json_dir);
 
-    ImageProcessing img_proc(&params);
+    float resize_factor = 2.0;
 
+    ImageProcessing img_proc(&params);
+    img_proc.setupORB(cv::NORM_HAMMING);
     
     cv::VideoCapture cap("../../dataset/Husky.mp4");
     if(!cap.isOpened()) {
@@ -19,6 +21,8 @@ int main(int argc, char**argv) {
         return -1;
     }
 
+    cv::Mat last_frame;
+    std::pair<std::vector<cv::KeyPoint>, cv::Mat> LastFeatureDescriptorPair;
 
     while(1) {
         cv::Mat frame;
@@ -27,10 +31,28 @@ int main(int argc, char**argv) {
             break;
         }
 
-        img_proc.UndistortImage(frame);
+        cv::resize(frame, frame, cv::Size(frame.size().width/resize_factor, frame.size().height/resize_factor));
+        frame = img_proc.UndistortImage(frame);
 
-        cv::imshow("Fucking", frame);
+        std::pair<std::vector<cv::KeyPoint>, cv::Mat> FeatureDescriptorPair = img_proc.extractFeaturesAndDescriptors(frame);
+
+        if(last_frame.empty()) {
+
+            last_frame = frame;
+            continue;
+        } 
+
+        //Perform 2 View BA
+        //Estimate Essential Matrix
+
+
+
+        cv::imshow("Current Frame", frame);
         cv::waitKey(1);
+
+
+        last_frame = frame;
+        LastFeatureDescriptorPair = FeatureDescriptorPair;
     }
 
     return 0;
