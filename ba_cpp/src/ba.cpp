@@ -13,8 +13,8 @@ int main(int argc, char **argv)
     float resize_factor = 2.0;
 
     ImageProcessing img_proc(&params);
-    // img_proc.setupORB(cv::NORM_HAMMING);
-    img_proc.setupSURF(cv::DescriptorMatcher::FLANNBASED);
+    img_proc.setupORB(cv::NORM_HAMMING);
+    // img_proc.setupSURF(cv::DescriptorMatcher::FLANNBASED);
 
     cv::VideoCapture cap("../../dataset/Husky.mp4");
     if (!cap.isOpened())
@@ -85,8 +85,7 @@ int main(int argc, char **argv)
         cv::Mat nonzeroEssentialIdx;
         cv::findNonZero(mask, nonzeroEssentialIdx);
 
-        std::cout<<mask.rows<<std::endl;
-        std::cout<<nonzeroEssentialIdx.rows<<std::endl;
+        int essential_inlier_num = nonzeroEssentialIdx.rows;
 
         std::vector<cv::Point2f> EssentialInlierPointCurr(nonzeroEssentialIdx.rows);
         std::vector<cv::Point2f> EssentialInlierPointLast(nonzeroEssentialIdx.rows);
@@ -104,9 +103,6 @@ int main(int argc, char **argv)
                      cv::Point2f(EssentialInlierPointLast[i].x + frame.cols, EssentialInlierPointLast[i].y), 
                      cv::Scalar(0, 255, 0), 1);
         }
-
-        // cv::imshow("SHIBAL",Combined);
-
 
         if (!E.empty())
         {
@@ -136,16 +132,14 @@ int main(int argc, char **argv)
             cv::Mat RtCurr = cv::Mat::eye(3, 4, CV_64FC1);
             R.copyTo(RtCurr.rowRange(0, 3).colRange(0, 3));
             t.copyTo(RtCurr.rowRange(0, 3).col(3));
+            std::cout<<RtCurr<<std::endl;
 
             cv::Mat TriangulatedPoints;
 
-            // cv::triangulatePoints(img_proc.cameraMatrix * RtLast, img_proc.cameraMatrix * RtCurr, InlierFeatureLast, InlierFeatureCurr, TriangulatedPoints);
+            cv::triangulatePoints(img_proc.cameraMatrix * RtLast, img_proc.cameraMatrix * RtCurr, InlierFeatureLast, InlierFeatureCurr, TriangulatedPoints);
 
-            cv::Mat dst;
-            cv::drawMatches(frame, FeatDescPairCurr.first, last_frame, FeatDescPairLast.first, matched_features, dst);
-
-            cv::Mat dst_copy;
-            dst.copyTo(dst_copy);
+            // cv::Mat dst;
+            // cv::drawMatches(frame, FeatDescPairCurr.first, last_frame, FeatDescPairLast.first, matched_features, dst);
 
             for(int i = 0; i < pose_inlier_num; ++i){
                 cv::line(Combined, 
@@ -154,10 +148,12 @@ int main(int argc, char **argv)
                          cv::Scalar(0, 0, 255), 1);
             }
 
-            cv::imshow("Current Frame", dst);
-            cv::imshow("Essential Inliers & Cheirality Inliers", Combined);
+            double inlier_ratio = double(pose_inlier_num)/double(essential_inlier_num);
+            std::cout<<"Inlier Ratio: "<<inlier_ratio<<std::endl;
 
-            cv::waitKey(1);
+            // cv::imshow("Current Frame", dst);
+            cv::imshow("Essential Inliers & Cheirality Inliers", Combined);
+            cv::waitKey(0);
         }
 
         last_frame = frame;

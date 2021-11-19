@@ -34,9 +34,6 @@ void Params::read_data(std::string & json_dir) {
     Json::Value image_size = root["ImageSize"];
     camParam.imageSize = cv::Size(std::stoi(image_size["width"].asString()), std::stoi(image_size["height"].asString()));
 
-    std::cout<<camParam.cameraMatrix<<std::endl;
-    std::cout<<camParam.distCoeffs<<std::endl;
-
 }
 
 float Params::value2float(Json::ValueIterator & it) {
