@@ -2,6 +2,7 @@
 #ifndef IMAGE_PROCESSING_H
 #define IMAGE_PROCESSING_H
 #include "params.h"
+#include "opencv2/xfeatures2d/nonfree.hpp"
 
 
 class ImageProcessing{
@@ -18,13 +19,13 @@ class ImageProcessing{
     bool calibrate_once;
 
     cv::Ptr<cv::Feature2D> feature;
-
-    std::vector<cv::KeyPoint> trgKeypoints, srcKeypoints;
     cv::Ptr<cv::DescriptorMatcher> matcher;
 
     void setupORB(int MatchingMethod);
+    void setupSURF(int MatchingMethod);
 
     std::pair<std::vector<cv::KeyPoint>, cv::Mat> extractFeaturesAndDescriptors(cv::Mat& img);
+    std::vector<cv::DMatch> matchFeatures(cv::Mat trgDesc, cv::Mat srcDesc);
 
 };
 

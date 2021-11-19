@@ -399,7 +399,8 @@ CMakeFiles/bundle_adjustment.dir/src/ba.cpp.o: ../src/ba.cpp \
   /usr/local/include/opencv4/opencv2/video.hpp \
   /usr/local/include/opencv4/opencv2/video/tracking.hpp \
   /usr/local/include/opencv4/opencv2/video/background_segm.hpp \
-  ../tools/image_processing.h
+  ../tools/image_processing.h \
+  /usr/local/include/opencv4/opencv2/xfeatures2d/nonfree.hpp
 
 CMakeFiles/bundle_adjustment.dir/tools/image_processing.cpp.o: ../tools/image_processing.cpp \
   /usr/include/stdc-predef.h \
@@ -799,7 +800,8 @@ CMakeFiles/bundle_adjustment.dir/tools/image_processing.cpp.o: ../tools/image_pr
   /usr/local/include/opencv4/opencv2/stitching/detail/camera.hpp \
   /usr/local/include/opencv4/opencv2/video.hpp \
   /usr/local/include/opencv4/opencv2/video/tracking.hpp \
-  /usr/local/include/opencv4/opencv2/video/background_segm.hpp
+  /usr/local/include/opencv4/opencv2/video/background_segm.hpp \
+  /usr/local/include/opencv4/opencv2/xfeatures2d/nonfree.hpp
 
 CMakeFiles/bundle_adjustment.dir/tools/params.cpp.o: ../tools/params.cpp \
   /usr/include/stdc-predef.h \
@@ -1552,6 +1554,8 @@ CMakeFiles/bundle_adjustment.dir/tools/params.cpp.o: ../tools/params.cpp \
 /usr/include/c++/9/bits/vector.tcc:
 
 /usr/include/c++/9/bits/erase_if.h:
+
+/usr/local/include/opencv4/opencv2/xfeatures2d/nonfree.hpp:
 
 /usr/include/c++/9/cmath:
 

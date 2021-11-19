@@ -36,6 +36,12 @@ void ImageProcessing::setupORB(int MatchingMethod){
     matcher = cv::BFMatcher::create(MatchingMethod);
 }
 
+void ImageProcessing::setupSURF(int MatchingMethod){
+    feature = cv::xfeatures2d::SurfFeatureDetector::create();
+    // matcher = cv::BFMatcher::create(MatchingMethod);
+    matcher = cv::FlannBasedMatcher::create();
+}
+
 
 std::pair<std::vector<cv::KeyPoint>, cv::Mat> ImageProcessing::extractFeaturesAndDescriptors(cv::Mat & img) {
 
@@ -55,4 +61,10 @@ std::pair<std::vector<cv::KeyPoint>, cv::Mat> ImageProcessing::extractFeaturesAn
 
     return std::pair<std::vector<cv::KeyPoint>, cv::Mat>(KeyPoints, Descriptors);
 
+}
+
+std::vector<cv::DMatch> ImageProcessing::matchFeatures(cv::Mat trgDesc, cv::Mat srcDesc) {
+    std::vector<cv::DMatch> matches;
+    matcher->match(trgDesc, srcDesc, matches);
+    return matches;
 }
