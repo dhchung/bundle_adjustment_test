@@ -27,7 +27,7 @@ int main(int argc, char **argv)
     std::pair<std::vector<cv::KeyPoint>, cv::Mat> FeatDescPairLast;
 
     int seq = 0;
-    int skipnum = 20;
+    int skipnum = 5;
 
     while (1)
     {
@@ -113,8 +113,8 @@ int main(int argc, char **argv)
             int pose_inlier_num = cv::recoverPose(E, MatchedFeatureLast, MatchedFeatureCurr, img_proc.cameraMatrix, R, t, mask);
             // std::cout << R << std::endl;
             // std::cout << t << std::endl;
-
-            // Triangulate Points
+            double inlier_ratio = double(pose_inlier_num)/double(essential_inlier_num);
+            std::cout<<"Inlier Ratio: "<<inlier_ratio<<std::endl;
 
             // Inlier Points
             cv::Mat nonzeroIdx;
@@ -132,28 +132,36 @@ int main(int argc, char **argv)
             cv::Mat RtCurr = cv::Mat::eye(3, 4, CV_64FC1);
             R.copyTo(RtCurr.rowRange(0, 3).colRange(0, 3));
             t.copyTo(RtCurr.rowRange(0, 3).col(3));
-            std::cout<<RtCurr<<std::endl;
 
-            cv::Mat TriangulatedPoints;
+            cv::Mat relative_R = R.t();
+            cv::Mat relative_t = -R.t()*t;
 
-            cv::triangulatePoints(img_proc.cameraMatrix * RtLast, img_proc.cameraMatrix * RtCurr, InlierFeatureLast, InlierFeatureCurr, TriangulatedPoints);
+            cv::Mat relative_Rt = cv::Mat::eye(3, 4, CV_64FC1);
+            relative_R.copyTo(relative_Rt.rowRange(0, 3).colRange(0, 3));
+            relative_t.copyTo(relative_Rt.rowRange(0, 3).col(3));
+            std::cout<<relative_Rt<<std::endl;
 
-            // cv::Mat dst;
-            // cv::drawMatches(frame, FeatDescPairCurr.first, last_frame, FeatDescPairLast.first, matched_features, dst);
+            if(inlier_ratio > 0.7) {
+                // Triangulate Points
+                cv::Mat TriangulatedPoints;
 
-            for(int i = 0; i < pose_inlier_num; ++i){
-                cv::line(Combined, 
-                         InlierFeatureCurr[i], 
-                         cv::Point2f(InlierFeatureLast[i].x + frame.cols, InlierFeatureLast[i].y), 
-                         cv::Scalar(0, 0, 255), 1);
+                cv::triangulatePoints(img_proc.cameraMatrix * RtLast, img_proc.cameraMatrix * RtCurr, InlierFeatureLast, InlierFeatureCurr, TriangulatedPoints);
+
+                // cv::Mat dst;
+                // cv::drawMatches(frame, FeatDescPairCurr.first, last_frame, FeatDescPairLast.first, matched_features, dst);
+
+                for(int i = 0; i < pose_inlier_num; ++i){
+                    cv::line(Combined, 
+                            InlierFeatureCurr[i], 
+                            cv::Point2f(InlierFeatureLast[i].x + frame.cols, InlierFeatureLast[i].y), 
+                            cv::Scalar(0, 0, 255), 1);
+                }
+
+                // cv::imshow("Current Frame", dst);
+                cv::imshow("Essential Inliers & Cheirality Inliers", Combined);
+                cv::waitKey(0);
             }
 
-            double inlier_ratio = double(pose_inlier_num)/double(essential_inlier_num);
-            std::cout<<"Inlier Ratio: "<<inlier_ratio<<std::endl;
-
-            // cv::imshow("Current Frame", dst);
-            cv::imshow("Essential Inliers & Cheirality Inliers", Combined);
-            cv::waitKey(0);
         }
 
         last_frame = frame;
