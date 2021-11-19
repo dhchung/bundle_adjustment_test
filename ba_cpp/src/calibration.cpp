@@ -47,12 +47,12 @@ std::string to_string_exact(double x)
 int main(int, char **)
 {
 
-    int checker_board_x = 8;
-    int checker_board_y = 8;
+    int checker_board_x = 13;
+    int checker_board_y = 10;
 
     std::cout << "Calibration Code" << std::endl;
-    std::string data_dir = "../calib_dataset";
-    int img_num = 90;
+    std::string data_dir = "../calib_dataset/new";
+    int img_num = 54;
 
     std::vector<std::vector<cv::Point3f>> board3DPs;
     // std::vector<cv::Point3f> board3DP(checker_board_x * checker_board_y);
@@ -63,7 +63,7 @@ int main(int, char **)
         for (int j = 0; j < checker_board_x; ++j)
         {
             // board3DP[checker_board_y * i + j] = cv::Point3f(j * 30.0, i * 30.0, 0.0);
-            board3DP.push_back(cv::Point3f(j * 30.0, i * 30.0, 0.0));
+            board3DP.push_back(cv::Point3f(j * 50.0, i * 50.0, 0.0));
 
         }
     } // marker size : 20mm
@@ -109,9 +109,9 @@ int main(int, char **)
             cv::imshow("Chessboard Coner detection result", img);
             cv::waitKey(1);
 
-            for (cv::Point2f point : corner_pts)
-            {
-                point *= resize_value; // resize point to original image size
+            for(int k = 0; k < corner_pts.size(); ++k) {
+                corner_pts[k].x *= resize_value;
+                corner_pts[k].y *= resize_value;
             }
 
             corner_pts_container.push_back(corner_pts);
@@ -133,7 +133,7 @@ int main(int, char **)
     double totalAvgErr = 0;
 
     double rms = cv::calibrateCamera(board3DPs, corner_pts_container, img_size,
-                                     cameraMatrix, distCoeffs, rvecs, tvecs);
+                                     cameraMatrix, distCoeffs, rvecs, tvecs, cv::CALIB_FIX_ASPECT_RATIO);
     std::cout << rms << std::endl;
 
     std::vector<float> perViewErrors;
@@ -202,17 +202,17 @@ int main(int, char **)
             img_height = img.size().height;
         }
 
-        cv::resize(img, img, cv::Size(img.size().width / resize_value, img.size().height / resize_value));
-
         cv::Mat img_undistort;
         cv::undistort(img, img_undistort, cameraMatrix, distCoeffs);
         
         cv::Mat Combined;
         cv::hconcat (img, img_undistort, Combined);
 
+        cv::resize(Combined, Combined, cv::Size(Combined.cols/4, Combined.rows/4));
+
 
         cv::imshow("undistorted img", Combined);
-        cv::waitKey(0);
+        cv::waitKey(1);
     }
 
 

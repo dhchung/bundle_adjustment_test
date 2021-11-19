@@ -28,13 +28,5 @@ cv::Mat ImageProcessing::UndistortImage(cv::Mat & img) {
 
 
     cv::undistort(img, undistorted_img, cameraMatrix, distCoeffs);
-
-
-    cv::Mat Compare;
-    cv::hconcat(img, undistorted_img, Compare);
-    cv::imshow("Original vs Undistorted", Compare);
-    cv::waitKey(0);
-
-
     return undistorted_img;
 }
