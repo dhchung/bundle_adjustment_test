@@ -2,11 +2,27 @@
 #include "params.h"
 #include "opencv2/opencv.hpp"
 #include "image_processing.h"
+#include "opengl_rendering.h"
+#include "slam.h"
+#include "utils.h"
+#include <fstream>
+
+
+OpenglRendering ogl_rendering("PointCloud Viewer");
 
 int main(int argc, char **argv)
 {
+
+    //Write Stuffs
+    std::string pose_writer_path = "../pose.txt";
+    std::ofstream write_pose(pose_writer_path.c_str());
+
+
+
+    SLAM slam;
+    // ogl_rendering.init_opengl();
     std::cout << "Bundle Adjustment" << std::endl;
-    std::string json_dir = "/home/dongha/dev/bundle_adjustment_test/ba_cpp/camera_calibration_result.json";
+    std::string json_dir = "../camera_calibration_result.json";
     Params params;
     params.read_data(json_dir);
 
@@ -16,7 +32,7 @@ int main(int argc, char **argv)
     img_proc.setupORB(cv::NORM_HAMMING);
     // img_proc.setupSURF(cv::DescriptorMatcher::FLANNBASED);
 
-    cv::VideoCapture cap("../../dataset/Husky.mp4");
+    cv::VideoCapture cap("../../dataset/CirclingAround.mp4");
     if (!cap.isOpened())
     {
         std::cout << "Failed to open the video" << std::endl;
@@ -25,9 +41,12 @@ int main(int argc, char **argv)
 
     cv::Mat last_frame;
     std::pair<std::vector<cv::KeyPoint>, cv::Mat> FeatDescPairLast;
+    int last_frame_no = 0;
+
+    int ptcld_no = 0;
 
     int seq = 0;
-    int skipnum = 5;
+    int skipnum = 1;
 
     while (1)
     {
@@ -54,6 +73,7 @@ int main(int argc, char **argv)
 
             last_frame = frame;
             FeatDescPairLast = FeatDescPairCurr;
+            last_frame_no = seq;
 
             continue;
         }
@@ -141,7 +161,7 @@ int main(int argc, char **argv)
             relative_t.copyTo(relative_Rt.rowRange(0, 3).col(3));
             std::cout<<relative_Rt<<std::endl;
 
-            if(inlier_ratio > 0.7) {
+            if(inlier_ratio > 0.6) {
                 // Triangulate Points
                 cv::Mat TriangulatedPoints;
 
@@ -159,14 +179,66 @@ int main(int argc, char **argv)
 
                 // cv::imshow("Current Frame", dst);
                 cv::imshow("Essential Inliers & Cheirality Inliers", Combined);
-                cv::waitKey(0);
-            }
+                cv::waitKey(1);
 
+                std::string ptcld_writer_path = "../points/point"+std::to_string(ptcld_no)+".txt";
+                std::ofstream write_cloud(ptcld_writer_path.c_str());
+                std::vector<Point3D> point3d(TriangulatedPoints.cols);
+
+
+                for(int point_id = 0; point_id < point3d.size(); ++point_id) {
+                    point3d[point_id].x = TriangulatedPoints.at<float>(0, point_id)/TriangulatedPoints.at<float>(3, point_id);
+                    point3d[point_id].y = TriangulatedPoints.at<float>(1, point_id)/TriangulatedPoints.at<float>(3, point_id);
+                    point3d[point_id].z = TriangulatedPoints.at<float>(2, point_id)/TriangulatedPoints.at<float>(3, point_id);
+
+                    cv::Vec3b color = frame.at<cv::Vec3b>(cv::Point(int(InlierFeatureCurr[point_id].x), int(InlierFeatureCurr[point_id].y)));
+
+                    std::cout<<TriangulatedPoints.col(point_id)<<std::endl;
+                    std::cout<<point3d[point_id].x<<"\n"<<point3d[point_id].y<<"\n"<<point3d[point_id].z<<std::endl;
+
+
+                    point3d[point_id].r = color[2];
+                    point3d[point_id].g = color[1];
+                    point3d[point_id].b = color[0];
+
+                    write_cloud << std::to_string(point3d[point_id].x) << "\t"
+                                << std::to_string(point3d[point_id].y) << "\t"
+                                << std::to_string(point3d[point_id].z) << "\t"
+                                << std::to_string(point3d[point_id].r) << "\t"
+                                << std::to_string(point3d[point_id].g) << "\t"
+                                << std::to_string(point3d[point_id].b) << "\n";
+                }
+                write_cloud.close();
+                std::cout<<TriangulatedPoints.colRange(0, 10)<<std::endl;
+
+                // ogl_rendering.draw_points(point3d);
+
+                for(int i = 0; i <4; ++i) {
+                    for(int j = 0; j < 3; ++j) {
+                        if(i==3 && j==2) {
+                            write_pose << std::to_string(relative_Rt.at<double>(j,i)) << "\n"; 
+                        } else {
+                            write_pose << std::to_string(relative_Rt.at<double>(j,i)) << "\t"; 
+                        }
+                    }
+                }
+
+
+                ++ptcld_no;
+
+            }
+            else {
+                continue;
+            }
         }
 
         last_frame = frame;
         FeatDescPairLast = FeatDescPairCurr;
+        last_frame_no = seq;
+
     }
+    ogl_rendering.terminate();
+    write_pose.close();
 
     return 0;
 }
